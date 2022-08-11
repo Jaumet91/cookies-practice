@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps, theme = 'dark' }: Props) {
     const selectedTheme: Theme =
       cookieTheme === 'light'
         ? lightTheme
-        : theme === 'dark'
+        : cookieTheme === 'dark'
         ? darkTheme
         : customTheme;
 

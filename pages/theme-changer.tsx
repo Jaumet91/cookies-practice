@@ -1,22 +1,28 @@
 import { ChangeEvent, FC, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 import {
+  Button,
   Card,
   CardContent,
   FormControl,
   FormControlLabel,
   FormLabel,
   Radio,
-  RadioGroup,
+  RadioGroup
 } from '@mui/material';
-import Cookies from 'js-cookie';
 
 import { Layout } from '../components/layouts';
 
-const ThemeChangerPager: FC = (props) => {
-  console.log({ props });
+interface Props {
+  theme: string;
+}
 
-  const [currentTheme, setCurrentTheme] = useState('light');
+const ThemeChangerPager: FC<Props> = ({ theme }) => {
+  // console.log({ props });
+
+  const [currentTheme, setCurrentTheme] = useState(theme);
 
   const onThemeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedTheme = event.target.value;
@@ -26,9 +32,15 @@ const ThemeChangerPager: FC = (props) => {
     Cookies.set('theme', selectedTheme);
   };
 
-  useEffect(() => {
-    console.log('localStorage', localStorage.getItem('theme'));
-  }, []);
+  const onClick = async () => {
+    const { data } = await axios.get('/api/hello');
+    // console.log({ data });
+  };
+
+  // useEffect(() => {
+  //   console.log('localStorage:', localStorage.getItem('theme'));
+  //   console.log('Cookies:', Cookies.get('theme'));
+  // }, []);
 
   return (
     <Layout>
@@ -38,18 +50,23 @@ const ThemeChangerPager: FC = (props) => {
             <FormLabel>Tema</FormLabel>
             <RadioGroup value={currentTheme} onChange={onThemeChange}>
               <FormControlLabel
-                value="light"
+                value='light'
                 control={<Radio />}
-                label="Light"
+                label='Light'
               />
-              <FormControlLabel value="dark" control={<Radio />} label="Dark" />
               <FormControlLabel
-                value="custom"
+                value='dark'
                 control={<Radio />}
-                label="Custom"
+                label='Dark'
+              />
+              <FormControlLabel
+                value='custom'
+                control={<Radio />}
+                label='Custom'
               />
             </RadioGroup>
           </FormControl>
+          <Button onClick={onClick}>Solicitud</Button>
         </CardContent>
       </Card>
     </Layout>
@@ -59,14 +76,18 @@ const ThemeChangerPager: FC = (props) => {
 // You should use getServerSideProps when:
 // - Only if you need to pre-render a page whose data must be fetched at request time
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req
+}) => {
   const { theme = 'light', name = 'No name' } = req.cookies;
+
+  const validThemes = ['dark', 'light', 'custom'];
 
   return {
     props: {
-      theme,
-      name,
-    },
+      theme: validThemes.includes(theme) ? theme : 'dark',
+      name
+    }
   };
 };
 
